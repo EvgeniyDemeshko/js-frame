@@ -1,0 +1,10 @@
+<h2>Список завдань</h2>
+
+<app-task-item
+    [task]="myTasks[0]"
+    (taskDeleted)="deleteTask($event)">
+</app-task-item>
+<app-task-item
+    [task]="myTasks[1]"
+    (taskDeleted)="deleteTask($event)">
+</app-task-item>

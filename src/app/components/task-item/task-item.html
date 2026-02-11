@@ -1,0 +1,9 @@
+<div class="task-item">
+    <h3>{{ task.title }}</h3>
+    @if (task.description) {
+        <p><strong>{{ task.description }}</strong></p>
+    }
+    <p><strong>Виконавець: {{ task.assignee }}</strong></p>
+    <p><strong>Дата виконання: {{ task.duedate }}</strong></p>
+    <button (click)="deleteTask(task.id)">Видалити</button>
+</div>
