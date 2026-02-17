@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Task } from '../../core/models/task.model';
 import { tasks } from '../../core/moc_data/tasks';
+import { TaskStatus } from '../../core/moc_data/status.enum';
 
 @Component({
   selector: 'app-task-list',
@@ -12,7 +13,17 @@ export class TaskList {
 
   myTasks: Task[] = tasks;
 
+  protected readonly TaskStatus = TaskStatus;
+
+  selectedStatus: TaskStatus | 'all' = 'all';
+
   deleteTask(index: number): void {
-    console.log(`Видалити завдання з індексом: ${index}`);
+    this.myTasks = this.myTasks.filter(task => task.id !== index);
   }
+
+  onSelected(event: Event): void {
+    const status = (event.target as HTMLSelectElement).value;
+    this.selectedStatus = status as TaskStatus | 'all';
+  }
+
 }

@@ -4,6 +4,21 @@
         <p><strong>{{ task.description }}</strong></p>
     }
     <p><strong>Виконавець: {{ task.assignee }}</strong></p>
-    <p><strong>Дата виконання: {{ task.duedate }}</strong></p>
+    <p><strong>Дата виконання: {{ task.dueDate }}</strong></p>
+    <p><strong>Статус: </strong> 
+        <span
+            [ngClass]="getStatusClasses()"
+    > {{ task.status }} 
+        </span>
+    </p>
+
+    <div class="select-status">
+        <select (change)="updateStatus($event)">
+            <option [value]="TaskStatus.TODO" [selected]="task.status === TaskStatus.TODO">🚀 До роботи</option>
+            <option [value]="TaskStatus.IN_PROGRESS" [selected]="task.status === TaskStatus.IN_PROGRESS">⏳ У процесі</option>
+            <option [value]="TaskStatus.DONE" [selected]="task.status === TaskStatus.DONE">✅ Виконано</option>
+        </select>
+    </div>
+
     <button (click)="deleteTask(task.id)">Видалити</button>
 </div>

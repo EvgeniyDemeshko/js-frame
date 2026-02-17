@@ -1,10 +1,19 @@
 <h2>Список завдань</h2>
+<div class="task-filter">
+    <p>Фільтр за статусом</p>
+    <select [value]="selectedStatus" (change)="onSelected($event)">
+        <option [value]="'all'">Всі</option>
+        <option [value]="TaskStatus.TODO">До роботи</option>
+        <option [value]="TaskStatus.IN_PROGRESS">В процесі</option>
+        <option [value]="TaskStatus.DONE">Виконано</option>
+    </select>
+</div>
 
-<app-task-item
-    [task]="myTasks[0]"
-    (taskDeleted)="deleteTask($event)">
-</app-task-item>
-<app-task-item
-    [task]="myTasks[1]"
-    (taskDeleted)="deleteTask($event)">
-</app-task-item>
+@for (task of myTasks | statusFilter:selectedStatus; track task.id; let index = $index) {
+    <app-task-item
+        [task]="task"
+        (taskDeleted)="deleteTask($event)">
+    </app-task-item>
+} @empty {
+    <p>Завдання відсутні</p>
+}

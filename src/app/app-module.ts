@@ -5,12 +5,14 @@ import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { TaskList } from './components/task-list/task-list';
 import { TaskItem } from './components/task-item/task-item';
+import { StatusFilterPipe } from './share/pipes/status-filter-pipe';
 
 @NgModule({
   declarations: [
     App,
     TaskList,
-    TaskItem
+    TaskItem,
+    StatusFilterPipe
   ],
   imports: [
     BrowserModule,
