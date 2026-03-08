@@ -23,7 +23,7 @@ h3 {
     color: orange;
 }
 
-button {
+.task-item-button.delete {
     background-color: #ff4d4d;
     color: white;
     border: none;
@@ -34,6 +34,21 @@ button {
 
     &:hover {
         background-color: #cc0000;
+    }
+}
+
+.task-item-button.edit {
+    background-color: #506da5;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-top: 10px;
+    margin-right: 5px;
+
+    &:hover {
+        background-color: #405a8c;
     }
 }
 

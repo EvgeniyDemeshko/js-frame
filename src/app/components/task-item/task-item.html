@@ -4,7 +4,7 @@
         <p><strong>{{ task.description }}</strong></p>
     }
     <p><strong>Виконавець: {{ task.assignee }}</strong></p>
-    <p><strong>Дата виконання: {{ task.dueDate }}</strong></p>
+    <p><strong>Дата виконання:</strong> {{ getFormattedDueDate() }} </p>
     <p><strong>Статус: </strong> 
         <span
             [ngClass]="getStatusClasses()"
@@ -20,5 +20,6 @@
         </select>
     </div>
 
-    <button (click)="deleteTask(task.id)">Видалити</button>
+    <button class="task-item-button edit" (click)="editTask()">Редагувати</button>
+    <button class="task-item-button delete" (click)="deleteTask(task.id)">Видалити</button>
 </div>

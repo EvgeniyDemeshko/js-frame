@@ -6,7 +6,7 @@ export const tasks: Task[] = [
         id: 0,
         title: 'Встановити Angular',
         assignee: 'Євгеній',
-        dueDate: '10.02.2026',
+        dueDate: new Date('2026-02-10'),
         status: TaskStatus.DONE
     },
     {
@@ -14,7 +14,7 @@ export const tasks: Task[] = [
         title: 'Ознайомитися з компонентами',
         description: 'Ознайомитися з компонентами та оглянути взаємодію між ними',
         assignee: 'Євгеній',
-        dueDate: '11.02.2026',
+        dueDate: new Date('2026-02-11'),
         status: TaskStatus.IN_PROGRESS
     },
     {
@@ -22,7 +22,7 @@ export const tasks: Task[] = [
         title: 'Ознайомитися з Control Flow',
         description: 'Ознайомитися з старим і новим підходом до Control Flow',
         assignee: 'Євгеній',
-        dueDate: '12.02.2026',
+        dueDate: new Date('2026-02-12'),
         status: TaskStatus.TODO
     }
 ];
