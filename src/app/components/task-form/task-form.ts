@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChange
 import { Task } from '../../core/models/task.model';
 import { TaskStatus } from '../../core/moc_data/status.enum';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TaskFormValidator } from '../../share/directives/task-form.validator';
 
 @Component({
   selector: 'app-task-form',
@@ -20,9 +21,9 @@ export class TaskFormComponent implements OnInit, OnChanges {
 
   taskForm: FormGroup = new FormGroup({
     title: new FormControl('', Validators.required),
-    description: new FormControl(''),
+    description: new FormControl('', TaskFormValidator.forbiddenWardsValidator(['React', 'Vue'])),
     assignee: new FormControl('', Validators.required),
-    dueDate: new FormControl('', Validators.required),
+    dueDate: new FormControl('', [Validators.required, TaskFormValidator.dateValidator]),
     status: new FormControl(TaskStatus.TODO, Validators.required)
   });
 
