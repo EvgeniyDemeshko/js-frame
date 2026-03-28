@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const cors = require('cors');
     
 const taskMockRoutes = require('./routes/taskMockRoutes');
 

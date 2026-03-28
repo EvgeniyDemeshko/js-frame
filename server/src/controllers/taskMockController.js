@@ -1,7 +1,13 @@
 const { tasks } = require('../models/taskMockModel');
 
 const getTasks = (req, res) => {
-    res.json(tasks);
+    let filteredTasks = [...tasks];
+
+    if (req.query.status) {
+        filteredTasks = filteredTasks.filter(task => String(task.status) === String(req.query.status));
+    }
+
+    res.json(filteredTasks);
 }
 
 const createTask = (req, res) => {

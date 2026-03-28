@@ -1,7 +1,7 @@
 const { check, validationResult } = require('express-validator');
 const TaskStatus = require('../constants/taskStatus');
 
-const ALLOWED_FIELDS = ['title', 'description', 'assignee', 'dueDate', 'status'];
+const ALLOWED_FIELDS = ['id', 'title', 'description', 'assignee', 'dueDate', 'status'];
 
 // 🔹 Валідація `POST` та `PUT`
 const validateTask = [

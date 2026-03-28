@@ -5,7 +5,7 @@ const formatDate = (date) => {
 };
 
 const parseDateMiddleware = (req, res, next) => {
-    if (req.body.dueDate) {
+    if (req.body && req.body.dueDate) {
         req.body.dueDate = formatDate(req.body.dueDate);
     }
     next();
@@ -26,3 +26,5 @@ const formatResponseDateMiddleware = (req, res, next) => {
     };
     next();
 };
+
+module.exports = { parseDateMiddleware, formatResponseDateMiddleware };

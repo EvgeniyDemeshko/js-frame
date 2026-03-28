@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Task } from '../../core/models/task.model';
 import { TaskStatus } from '../../core/moc_data/status.enum';
+import { TaskService } from '../../services/task';
 
 @Component({
   selector: 'app-task-item',
@@ -17,9 +18,10 @@ export class TaskItem {
 
   protected readonly TaskStatus = TaskStatus;
 
-  constructor(private readonly datePipe: DatePipe) {}
+  constructor(private readonly datePipe: DatePipe, private readonly taskService: TaskService) {}
 
-  deleteTask(id: number): void {
+  deleteTask(id: number | undefined ): void {
+    if (!id) return;
     this.taskDeleted.emit(id);
   }
 
@@ -37,7 +39,12 @@ export class TaskItem {
 
   updateStatus(event: Event): void {
     const selectedValue: string = (event.target as HTMLSelectElement).value;
-    this.task.status = selectedValue as TaskStatus;
+    if (!this.task.id) return;
+
+    this.taskService.patchTask(this.task.id, { status: selectedValue as TaskStatus }).subscribe({
+      next: (updatedTask: Task) => this.task.status = updatedTask.status,
+      error: (error: any) => console.log('Помилка оновлення статусу:', error),
+    });
   }
 
   getFormattedDueDate(): string {

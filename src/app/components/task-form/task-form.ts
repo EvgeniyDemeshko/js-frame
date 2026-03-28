@@ -29,10 +29,7 @@ export class TaskFormComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['editTask'] && this.editTask) {
-      this.taskForm.patchValue({
-        ...this.editTask,
-      dueDate: this.editTask.dueDate.toISOString().split('T')[0]
-    });
+      this.taskForm.patchValue(this.editTask);
     }
   }
   
@@ -42,38 +39,19 @@ export class TaskFormComponent implements OnInit, OnChanges {
       title: '',
       description: '',
       assignee: '',
-      dueDate: new Date(),
+      dueDate: new Date().toISOString().split('T')[0],
       status: TaskStatus.TODO
     }
   }
 
   addTask(): void {
-    this.submitted = true;
-    this.taskForm.markAllAsTouched();
-
-    if (this.taskForm.invalid) {
-      return;
+    if (this.taskForm.valid) {
+      let taskData = {
+        ...this.taskForm.value,
+        id: this.editTask ? this.editTask.id : undefined,
+      };
+      this.taskAdd.emit(taskData as Task);
+      this.taskForm.reset();
     }
-
-    const formValue = this.taskForm.value;
-    const copyTask: Task = {
-      id: this.editTask?.id ?? -1,
-      title: formValue.title ?? '',
-      description: formValue.description ?? '',
-      assignee: formValue.assignee ?? '',
-      dueDate: new Date(formValue.dueDate ?? new Date()),
-      status: (formValue.status as TaskStatus) ?? TaskStatus.TODO,
-    };
-
-    this.taskAdd.emit(copyTask);
-
-    this.taskForm.reset({
-      title: '',
-      description: '',
-      assignee: '',
-      dueDate: '',
-      status: TaskStatus.TODO,
-    });
-    this.submitted = false;
   }
 }

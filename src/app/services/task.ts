@@ -1,37 +1,41 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { Task } from '../core/models/task.model';
-import { tasks } from '../core/moc_data/tasks';
+import { AppConfig, CONFIG_TOKEN } from '../share/config/config';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
+
+  constructor( 
+    private http: HttpClient,
+    @Inject(CONFIG_TOKEN) private config: AppConfig
+  ) {}
   
-  private tasks: Task[] = [...tasks];
+  getTasks(status?: string): Observable<Task[]> {
+    let params = new HttpParams();
 
-  constructor() {}
+    if (status) params = params.set('status', status);
 
-  addtask(newTask: Task): void {
-    const maxId = this.tasks.length > 0 ? Math.max(...this.tasks.map(task => task.id)) : 0;
-    newTask = {
-      ...newTask,
-      id: maxId + 1,
-    }
-    this.tasks.push(newTask);
+    return this.http.get<Task[]>(`${this.config.apiUrl}/v1/tasks`, { params });
   }
 
-  updateTask(updatedTask: Task): void {
-    this.tasks = this.tasks.map(t => 
-      t.id === updatedTask.id ? {...updatedTask} : t
-    );
+  createTask(newTask: Task): Observable<Task> {
+    return this.http.post<Task>(`${this.config.apiUrl}/v1/tasks`, newTask);
   }
 
-  deleteTask(index: number): void {
-    this.tasks = this.tasks.filter(task => task.id !== index);
+  updateTask(id: number, updatedTask: Task): Observable<Task> {
+    return this.http.put<Task>(`${this.config.apiUrl}/v1/tasks/${id}`, updatedTask);
   }
 
-  getTasks(): Task[] {
-    return this.tasks;
+  patchTask(id: number, updatedFields: Partial<Task>): Observable<Task> {
+    return this.http.patch<Task>(`${this.config.apiUrl}/v1/tasks/${id}`, updatedFields);
+  }
+
+  deleteTask(index: number): Observable<void> {
+    return this.http.delete<void>(`${this.config.apiUrl}/v1/tasks/${index}`);
   }
 
 }
