@@ -19,23 +19,23 @@ export class TaskService {
 
     if (status) params = params.set('status', status);
 
-    return this.http.get<Task[]>(`${this.config.apiUrl}/v1/tasks`, { params });
+    return this.http.get<Task[]>(`${this.config.apiUrl}/v2/tasks`, { params });
   }
 
-  createTask(newTask: Task): Observable<Task> {
-    return this.http.post<Task>(`${this.config.apiUrl}/v1/tasks`, newTask);
+  createTask(newTask: Omit<Task, 'id'>): Observable<Task> {
+    return this.http.post<Task>(`${this.config.apiUrl}/v2/tasks`, newTask);
   }
 
-  updateTask(id: number, updatedTask: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.config.apiUrl}/v1/tasks/${id}`, updatedTask);
+  updateTask(id: string, updatedTask: Task): Observable<Task> {
+    return this.http.put<Task>(`${this.config.apiUrl}/v2/tasks/${id}`, updatedTask);
   }
 
-  patchTask(id: number, updatedFields: Partial<Task>): Observable<Task> {
-    return this.http.patch<Task>(`${this.config.apiUrl}/v1/tasks/${id}`, updatedFields);
+  patchTask(id: string, updatedFields: Partial<Task>): Observable<Task> {
+    return this.http.patch<Task>(`${this.config.apiUrl}/v2/tasks/${id}`, updatedFields);
   }
 
-  deleteTask(index: number): Observable<void> {
-    return this.http.delete<void>(`${this.config.apiUrl}/v1/tasks/${index}`);
+  deleteTask(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.config.apiUrl}/v2/tasks/${id}`);
   }
 
 }

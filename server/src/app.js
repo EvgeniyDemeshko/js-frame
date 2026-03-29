@@ -1,10 +1,12 @@
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
+const connectDB = require('./config/db');
     
 const taskMockRoutes = require('./routes/taskMockRoutes');
+const taskRoutes = require('./routes/task.route');
 
-const { parseDateMiddleware, formatResponseDateMiddleware } = require('./middleware/dateMiddleware');
+connectDB();
 
 const app = express();
 
@@ -14,9 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(multer().any());
 
-app.use(parseDateMiddleware);
-app.use(formatResponseDateMiddleware);
-
 app.use('/api/v1', taskMockRoutes);
+app.use('/api/v2', taskRoutes);
 
 module.exports = app;

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Task } from '../../core/models/task.model';
-import { tasks } from '../../core/moc_data/tasks';
 import { TaskStatus } from '../../core/moc_data/status.enum';
 import { TaskService } from '../../services/task';
 import { Observable } from 'rxjs';
@@ -50,7 +49,7 @@ export class TaskList implements OnInit {
     this.editingTask = {...task};
   }
 
-  deleteTask(id: number): void {
+  deleteTask(id: string): void {
     this.taskService.deleteTask(id).subscribe({
       next: () => this.loadTasks(),
       error: error => console.log(error),

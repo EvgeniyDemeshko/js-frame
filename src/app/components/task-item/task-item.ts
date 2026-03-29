@@ -13,14 +13,14 @@ import { TaskService } from '../../services/task';
 })
 export class TaskItem {
   @Input() task!: Task;
-  @Output() taskDeleted: EventEmitter<number> = new EventEmitter<number>();
+  @Output() taskDeleted: EventEmitter<string> = new EventEmitter<string>();
   @Output() taskEdited: EventEmitter<Task> = new EventEmitter<Task>();
 
   protected readonly TaskStatus = TaskStatus;
 
   constructor(private readonly datePipe: DatePipe, private readonly taskService: TaskService) {}
 
-  deleteTask(id: number | undefined ): void {
+  deleteTask(id: string | undefined ): void {
     if (!id) return;
     this.taskDeleted.emit(id);
   }
