@@ -35,7 +35,7 @@ export class TaskFormComponent implements OnInit, OnChanges {
   
   ngOnInit(): void {
     this.task = {
-      id: -1,
+      id: '',
       title: '',
       description: '',
       assignee: '',
