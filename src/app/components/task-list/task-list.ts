@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Task } from '../../core/models/task.model';
 import { tasks } from '../../core/moc_data/tasks';
 import { TaskStatus } from '../../core/moc_data/status.enum';
 import { TaskService } from '../../services/task';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-task-list',
@@ -10,49 +11,58 @@ import { TaskService } from '../../services/task';
   templateUrl: './task-list.html',
   styleUrl: './task-list.scss',
 })
-export class TaskList {
+export class TaskList implements OnInit {
 
-  myTasks: Task[] = tasks;
+  myTasks$!: Observable<Task[]>;
 
-  protected readonly TaskStatus = TaskStatus;
-
-  selectedStatus: TaskStatus | 'all' = 'all';
+  selectedStatus: TaskStatus | '' = '';
 
   editingTask: Task | null = null;
 
   constructor(private taskService: TaskService) {
-    this.loadTasks();
   }
 
   ngOnInit(): void {
     this.loadTasks();
   }
 
-  loadTasks(): void {
-    this.myTasks = this.taskService.getTasks();
+  loadTasks(status?: string): void {
+    this.myTasks$ = this.taskService.getTasks(status);
+  }
+
+  addTask(task: Task): void {
+    if (this.editingTask) {
+      if (!task.id) return;
+      this.taskService.updateTask(task.id, task).subscribe({
+      next: () => this.loadTasks(),
+      error: error => console.log(error),
+    });
+    this.editingTask = null;
+    } else {
+      this.taskService.createTask(task).subscribe({
+        next: () => this.loadTasks(),
+        error: error => console.log(error),
+      });
+    }
   }
 
   editTask(task: Task): void {
     this.editingTask = {...task};
   }
 
-  deleteTask(index: number): void {
-    this.taskService.deleteTask(index);
-    this.loadTasks();
+  deleteTask(id: number): void {
+    this.taskService.deleteTask(id).subscribe({
+      next: () => this.loadTasks(),
+      error: error => console.log(error),
+    });
   }
 
   onSelected(event: Event): void {
     const status = (event.target as HTMLSelectElement).value;
-    this.selectedStatus = status as TaskStatus | 'all';
+    this.selectedStatus = status as TaskStatus | '';
+    this.loadTasks(this.selectedStatus);
   }
 
-  addTask(task: Task): void {
-    if (this.editingTask) {
-      this.taskService.updateTask(task);
-      this.editingTask = null;
-    } else {
-      this.taskService.addtask(task);
-    }
-      this.loadTasks();
-    }
+  protected readonly TaskStatus = TaskStatus;
+
 }

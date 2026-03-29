@@ -6,10 +6,7 @@
     <p><strong>Виконавець: {{ task.assignee }}</strong></p>
     <p><strong>Дата виконання:</strong> {{ getFormattedDueDate() }} </p>
     <p><strong>Статус: </strong> 
-        <span
-            [ngClass]="getStatusClasses()"
-    > {{ task.status }} 
-        </span>
+        <span [ngClass]="getStatusClasses()"> {{ task.status | taskStatus }} </span>
     </p>
 
     <div class="select-status">
