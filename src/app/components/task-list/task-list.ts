@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Task } from '../../core/models/task.model';
 import { TaskStatus } from '../../core/moc_data/status.enum';
-import { TaskService } from '../../services/task';
-import { Observable } from 'rxjs';
+import { combineLatest, debounce, debounceTime, distinct, distinctUntilChanged, map, Observable, startWith, Subject, takeUntil } from 'rxjs';
+import { TaskStateService } from '../../share/state/task-state';
+import { MatDialog } from '@angular/material/dialog';
+import { TaskFormComponent } from '../task-form/task-form';
+import { MatSelectChange } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-task-list',
@@ -12,54 +17,81 @@ import { Observable } from 'rxjs';
 })
 export class TaskList implements OnInit {
 
-  myTasks$!: Observable<Task[]>;
-
-  selectedStatus: TaskStatus | '' = '';
-
+  destroy$ = new Subject<void>();
   editingTask: Task | null = null;
+  selectedStatus: TaskStatus | 'all' = 'all';
 
-  constructor(private taskService: TaskService) {
+  myTasks$!: Observable<Task[]>;
+  loading$!: Observable<boolean>;
+
+  hasLoading: boolean = false;
+
+  filterControl = new FormControl('');
+
+  constructor(
+    private taskStateService: TaskStateService,
+    private dialog: MatDialog,
+    private snackbar: MatSnackBar,
+    private matSpinner: MatSnackBar
+  ) {
   }
 
   ngOnInit(): void {
-    this.loadTasks();
+    this.taskStateService.loadTasks();
+
+    this.myTasks$ = combineLatest([
+      this.taskStateService.tasks$,
+      this.filterControl.valueChanges.pipe(
+        startWith(''),
+        debounceTime(300),
+        distinctUntilChanged()
+      )
+    ]).pipe(
+      map(([tasks, filter]) => {
+        const query = (filter ?? '').toLowerCase();
+        return tasks.filter(task =>
+          task.title.toLowerCase().includes(query) ||
+          task.description?.toLowerCase().includes(query) ||
+          task.assignee.toLowerCase().includes(query)
+        );
+      }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  openDialog(): void {
+    this.dialog.open(TaskFormComponent, {
+      height: '70vh',
+      width: '80vw',
+    });
   }
 
   loadTasks(status?: string): void {
-    this.myTasks$ = this.taskService.getTasks(status);
+    const taskStatus = status && status !== 'all' ? status : undefined;
+    this.taskStateService.loadTasks(taskStatus);
   }
 
   addTask(task: Task): void {
     if (this.editingTask) {
       if (!task.id) return;
-      this.taskService.updateTask(task.id, task).subscribe({
-      next: () => this.loadTasks(),
-      error: error => console.log(error),
-    });
-    this.editingTask = null;
+      this.taskStateService.updateTask(task);
+      this.editingTask = null;
     } else {
-      this.taskService.createTask(task).subscribe({
-        next: () => this.loadTasks(),
-        error: error => console.log(error),
-      });
+      this.taskStateService.createTask(task);
     }
   }
 
   editTask(task: Task): void {
-    this.editingTask = {...task};
+    this.taskStateService.selectTask(task);
+    this.openDialog();
   }
 
-  deleteTask(id: string): void {
-    this.taskService.deleteTask(id).subscribe({
-      next: () => this.loadTasks(),
-      error: error => console.log(error),
-    });
-  }
-
-  onSelected(event: Event): void {
-    const status = (event.target as HTMLSelectElement).value;
-    this.selectedStatus = status as TaskStatus | '';
-    this.loadTasks(this.selectedStatus);
+  onSelected(event: MatSelectChange): void {
+    this.taskStateService.loadTasks(event.value);
   }
 
   protected readonly TaskStatus = TaskStatus;

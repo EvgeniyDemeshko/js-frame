@@ -1,22 +1,31 @@
-<div class="task-item">
-    <h3>{{ task.title }}</h3>
-    @if (task.description) {
+<mat-card class="task-item">
+    <mat-card-header>
+        <mat-card-title>{{ task.title }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+
+    </mat-card-content>
+        @if (task.description) {
         <p><strong>{{ task.description }}</strong></p>
-    }
-    <p><strong>Виконавець: {{ task.assignee }}</strong></p>
-    <p><strong>Дата виконання:</strong> {{ getFormattedDueDate() }} </p>
-    <p><strong>Статус: </strong> 
-        <span [ngClass]="getStatusClasses()"> {{ task.status | taskStatus }} </span>
-    </p>
+        }
+        <p><strong>Виконавець: {{ task.assignee }}</strong></p>
+        <p><strong>Дата виконання:</strong> {{ task.dueDate | date:'dd.MM.yyyy' }} </p>
+        <p><strong>Статус: </strong> 
+            <span [ngClass]="getStatusClasses()"> {{ task.status | taskStatus }} </span>
+        </p>
 
-    <div class="select-status">
-        <select (change)="updateStatus($event)">
-            <option [value]="TaskStatus.TODO" [selected]="task.status === TaskStatus.TODO">🚀 До роботи</option>
-            <option [value]="TaskStatus.IN_PROGRESS" [selected]="task.status === TaskStatus.IN_PROGRESS">⏳ У процесі</option>
-            <option [value]="TaskStatus.DONE" [selected]="task.status === TaskStatus.DONE">✅ Виконано</option>
-        </select>
-    </div>
+    <mat-form-field>
+        <mat-label>Статус</mat-label>
+        <mat-select (selectionChange)="updateStatus($event)">
+            <mat-option [value]="TaskStatus.TODO">До роботи</mat-option>
+            <mat-option [value]="TaskStatus.IN_PROGRESS">У процесі</mat-option>
+            <mat-option [value]="TaskStatus.DONE">Виконано</mat-option>
+        </mat-select>
+    </mat-form-field>
 
-    <button class="task-item-button edit" (click)="editTask()">Редагувати</button>
-    <button class="task-item-button delete" (click)="deleteTask(task.id)">Видалити</button>
-</div>
+    <mat-card-actions>
+        <button mat-fab class="edit-button" (click)="editTask()"><mat-icon>edit</mat-icon></button>
+        <button mat-fab class="delete-button" (click)="deleteTask(task.id)"><mat-icon>delete</mat-icon></button>
+    </mat-card-actions>
+</mat-card>
