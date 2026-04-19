@@ -2,7 +2,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Task } from '../../core/models/task.model';
 import { TaskStatus } from '../../core/moc_data/status.enum';
-import { TaskService } from '../../services/task';
+import { TaskStateService } from '../../share/state/task-state';
+import { MatSelectChange } from '@angular/material/select';
 
 @Component({
   selector: 'app-task-item',
@@ -13,16 +14,13 @@ import { TaskService } from '../../services/task';
 })
 export class TaskItem {
   @Input() task!: Task;
-  @Output() taskDeleted: EventEmitter<string> = new EventEmitter<string>();
+
   @Output() taskEdited: EventEmitter<Task> = new EventEmitter<Task>();
 
-  protected readonly TaskStatus = TaskStatus;
+  constructor(private taskStateService: TaskStateService) {}
 
-  constructor(private readonly datePipe: DatePipe, private readonly taskService: TaskService) {}
-
-  deleteTask(id: string | undefined ): void {
-    if (!id) return;
-    this.taskDeleted.emit(id);
+  deleteTask(id: string): void {
+    this.taskStateService.deleteTask(id);
   }
 
   editTask(): void {
@@ -37,17 +35,10 @@ export class TaskItem {
     }
   }
 
-  updateStatus(event: Event): void {
-    const selectedValue: string = (event.target as HTMLSelectElement).value;
-    if (!this.task.id) return;
-
-    this.taskService.patchTask(this.task.id, { status: selectedValue as TaskStatus }).subscribe({
-      next: (updatedTask: Task) => this.task.status = updatedTask.status,
-      error: (error: any) => console.log('Помилка оновлення статусу:', error),
-    });
+  updateStatus(event: MatSelectChange): void {
+    const selectedValue = event.value;
+    this.taskStateService.patchTask(this.task.id, { status: selectedValue });
   }
 
-  getFormattedDueDate(): string {
-    return this.datePipe.transform(this.task.dueDate, 'dd.MM.yyyy') ?? '';
-  }
+  protected readonly TaskStatus = TaskStatus;
 }

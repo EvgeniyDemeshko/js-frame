@@ -9,19 +9,6 @@ const taskSchema = new mongoose.Schema({
     status: { type: String, enum: Object.values(TaskStatus), default: TaskStatus.TODO },
 }, { timestamps: true });
 
-taskSchema.set('toJSON', {
-    transform: function (doc, ret) {
-        ret.id = ret._id;
-        delete ret._id;
-
-        if (ret.dueDate) {
-            ret.dueDate = ret.dueDate.toISOString().split('T')[0];
-        }
-
-        return ret;
-    }
-});
-
 const TaskModel = mongoose.model('Task', taskSchema);
 
 module.exports = TaskModel;
