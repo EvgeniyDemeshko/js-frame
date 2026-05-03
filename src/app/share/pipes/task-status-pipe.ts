@@ -10,7 +10,7 @@ export class TaskStatusPipe implements PipeTransform {
   transform(status: TaskStatus): string {
     const statusMap: { [key in TaskStatus]: string } = {
       [TaskStatus.TODO]: 'До роботи',
-      [TaskStatus.IN_PROGRESS]: 'В процесі',
+      [TaskStatus.IN_PROGRESS]: 'У процесі',
       [TaskStatus.DONE]: 'Виконано'
     };
     return statusMap[status] || 'Невідомий статус';

@@ -40,9 +40,9 @@
     <mat-form-field appearance="outline">
         <mat-label>Статус</mat-label>
             <mat-select id="status" formControlName="status">
-            <mat-option [value]="TaskStatus.TODO">До роботи</mat-option>
-            <mat-option [value]="TaskStatus.IN_PROGRESS">В процесі</mat-option>
             <mat-option [value]="TaskStatus.DONE">Виконано</mat-option>
+            <mat-option [value]="TaskStatus.TODO">До роботи</mat-option>
+            <mat-option [value]="TaskStatus.IN_PROGRESS">У процесі</mat-option>
         </mat-select>
         <mat-error *ngIf="taskForm.get('status')?.hasError('required') &&
         taskForm.get('status')?.dirty">

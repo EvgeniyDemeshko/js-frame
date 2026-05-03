@@ -1,72 +1,70 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Task } from '../../core/models/task.model';
-import { TaskStatus } from '../../core/moc_data/status.enum';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { TaskFormValidator } from '../../share/directives/task-form.validator';
-import { Subject, takeUntil } from 'rxjs';
-import { TaskStateService } from '../../share/state/task-state';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { AppState } from '../../app.state';
+import { TaskStatus } from '../../core/moc_data/status.enum';
+import { Task } from '../../core/models/task.model';
+import { TaskFormValidator } from '../../share/directives/task-form.validator';
+import * as TaskActions from '../../store/task/task.actions';
+import * as TaskSelectors from '../../store/task/task.selectors';
 
 @Component({
   selector: 'app-task-form',
-    standalone: false,
+  standalone: false,
   templateUrl: './task-form.html',
   styleUrl: './task-form.scss',
 })
 export class TaskFormComponent implements OnInit, OnDestroy {
-  
   destroy$ = new Subject<void>();
+  selectedTask$!: Observable<Task | null>;
+  taskForm!: FormGroup;
   editMode: boolean = false;
-  private editingTaskId: string | null = null;
-
-  taskForm: FormGroup = new FormGroup({
-    title: new FormControl('', Validators.required),
-    description: new FormControl('', TaskFormValidator.forbiddenWardsValidator(['React', 'Vue'])),
-    assignee: new FormControl('', Validators.required),
-    dueDate: new FormControl('', [Validators.required, TaskFormValidator.dateValidator]),
-    status: new FormControl(TaskStatus.TODO, Validators.required)
-  });
-
-  protected readonly TaskStatus = TaskStatus;
 
   constructor(
-    private taskStateService: TaskStateService,
+    private store: Store<AppState>,
+    private fb: FormBuilder,
     public dialogRef: MatDialogRef<TaskFormComponent>,
   ) {}
-  
+
   ngOnInit(): void {
-    this.taskStateService.selectedTask$.pipe(takeUntil(this.destroy$)).subscribe((task) => {
+    this.selectedTask$ = this.store.select(TaskSelectors.selectSelectedTask);
+    this.taskForm = this.fb.group({
+      id: [''],
+      title: ['', Validators.required],
+      description: ['', TaskFormValidator.forbiddenWardsValidator(['React', 'Vue'])],
+      dueDate: ['', [Validators.required, TaskFormValidator.dateValidator]],
+      assignee: ['', Validators.required],
+      status: [TaskStatus.TODO, Validators.required],
+    });
+
+    this.selectedTask$.pipe(takeUntil(this.destroy$)).subscribe((task: Task | null) => {
       if (task) {
         this.taskForm.patchValue(task);
         this.editMode = true;
-        this.editingTaskId = task.id;
       } else {
-        this.taskForm.reset({status: TaskStatus.TODO});
+        this.taskForm.reset({ status: TaskStatus.TODO });
         this.editMode = false;
-        this.editingTaskId = null;
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onSubmit(): void {
     if (this.taskForm.valid) {
       if (this.editMode) {
-        this.taskStateService.updateTask({
-          id: this.editingTaskId ?? '',
-          ...(this.taskForm.value as Omit<Task, 'id'>)
-        } as Task);
-        this.taskStateService.selectTask(null);
+        this.store.dispatch(TaskActions.updateTask({ task: { ...this.taskForm.value } }));
       } else {
-        this.taskStateService.createTask(this.taskForm.value as Task);
+        this.store.dispatch(TaskActions.createTask({ task: { ...this.taskForm.value } }));
       }
+
+      this.store.dispatch(TaskActions.selectTask({ id: null }));
       this.dialogRef.close();
     }
-  }
-
-  ngOnDestroy(): void {
-    this.taskStateService.selectTask(null);
-    this.editingTaskId = null;
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
