@@ -1,106 +1,58 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, catchError, finalize, switchMap, tap, throwError } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { Task } from '../../core/models/task.model';
-import { TaskService } from '../../services/task';
+import { TaskStatus } from '../../core/moc_data/status.enum';
+import { AppState } from '../../app.state';
+import * as TaskActions from '../../store/task/task.actions';
+import {
+  selectFilteredTasks,
+  selectSelectedTask,
+  selectTaskError,
+  selectTaskLoading,
+} from '../../store/task/task.selectors';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskStateService {
-  private _tasks$: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
-  private _selectedTask$: BehaviorSubject<Task | null> = new BehaviorSubject<Task | null>(null);
-  private _loading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  private _error$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
-  private currentStatusFilter?: string;
+  public readonly tasks$: Observable<Task[]>;
+  public readonly selectedTask$: Observable<Task | null>;
+  public readonly loading$: Observable<boolean>;
+  public readonly error$: Observable<string | null>;
 
-  public readonly tasks$ = this._tasks$.asObservable();
-  public readonly selectedTask$ = this._selectedTask$.asObservable();
-  public readonly loading$ = this._loading$.asObservable();
-  public readonly error$ = this._error$.asObservable();
-
-  constructor(private taskService: TaskService) {}
-
-  loadTasks(status?: string): void {
-    this.currentStatusFilter = status;
-    this._loading$.next(true);
-    this._error$.next(null);
-
-    this.taskService.getTasks(status)
-    .pipe(
-      tap((tasks: Task[]) => this._tasks$.next(tasks)),
-      catchError(err => {
-        this._error$.next((err.console.errors) ? err.error.message + err.error.errors : err.error.message );
-        return throwError(() => err.message);
-       }),
-       finalize(() => this._loading$.next(false)),
-    ).subscribe()
+  constructor(private store: Store<AppState>) {
+    this.tasks$ = this.store.select(selectFilteredTasks);
+    this.selectedTask$ = this.store.select(selectSelectedTask);
+    this.loading$ = this.store.select(selectTaskLoading);
+    this.error$ = this.store.select(selectTaskError);
   }
 
-  createTask(task: Task): void {
-    this._loading$.next(true);
-    this._error$.next(null);
+  loadTasks(status?: string): void {
+    const selectedStatus = (status ?? '') as TaskStatus | '';
+    this.store.dispatch(TaskActions.setFilterStatus({ status: selectedStatus }));
+    this.store.dispatch(
+      selectedStatus ? TaskActions.loadTasks({ status: selectedStatus }) : TaskActions.loadTasks({})
+    );
+  }
 
-    this.taskService.createTask(task)
-    .pipe(
-      switchMap(() => this.taskService.getTasks(this.currentStatusFilter)),
-      tap((updatedTasks: Task[]) => this._tasks$.next(updatedTasks)),
-      catchError(err => {
-        this._error$.next((err.console.errors) ? err.error.message + err.error.errors : err.error.message );
-        return throwError(() => err.message);
-       }),
-       finalize(() => this._loading$.next(false)),
-    ).subscribe()
+  createTask(task: Omit<Task, 'id'>): void {
+    this.store.dispatch(TaskActions.createTask({ task }));
   }
 
   updateTask(task: Task): void {
-    this._loading$.next(true);
-    this._error$.next(null);
-
-    this.taskService.updateTask(task.id, task)
-    .pipe(
-      switchMap(() => this.taskService.getTasks(this.currentStatusFilter)),
-      tap((updatedTasks: Task[]) => this._tasks$.next(updatedTasks)),
-      catchError(err => {
-        this._error$.next((err.console.errors) ? err.error.message + err.error.errors : err.error.message );
-        return throwError(() => err.message);
-       }),
-       finalize(() => this._loading$.next(false)),
-    ).subscribe()
+    this.store.dispatch(TaskActions.updateTask({ task }));
   }
 
   patchTask(id: string, task: Partial<Task>): void {
-    this._loading$.next(true);
-    this._error$.next(null);
-
-    this.taskService.patchTask(id, task)
-    .pipe(
-      switchMap(() => this.taskService.getTasks(this.currentStatusFilter)),
-      tap((updatedTasks: Task[]) => this._tasks$.next(updatedTasks)),
-      catchError(err => {
-        this._error$.next((err.console.errors) ? err.error.message + err.error.errors : err.error.message );
-        return throwError(() => err.message);
-       }),
-       finalize(() => this._loading$.next(false)),
-    ).subscribe()
+    this.store.dispatch(TaskActions.patchTask({ id, changes: task }));
   }
 
   deleteTask(id: string): void {
-    this._loading$.next(true);
-    this._error$.next(null);
-
-    this.taskService.deleteTask(id)
-    .pipe(
-      switchMap(() => this.taskService.getTasks(this.currentStatusFilter)),
-      tap((updatedTasks: Task[]) => this._tasks$.next(updatedTasks)),
-      catchError(err => {
-        this._error$.next((err.console.errors) ? err.error.message + err.error.errors : err.error.message );
-        return throwError(() => err.message);
-       }),
-      finalize(() => this._loading$.next(false)),
-    ).subscribe();
+    this.store.dispatch(TaskActions.deleteTask({ id }));
   }
 
   selectTask(task: Task | null): void {
-    this._selectedTask$.next(task);
+    this.store.dispatch(TaskActions.selectTask({ id: task?.id ?? null }));
   }
 }

@@ -36,10 +36,10 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
     try {
-        const updatedTask = await TaskModel.findOneAndReplace(
-            { '_id': req.params.id },
+        const updatedTask = await TaskModel.findByIdAndUpdate(
+            req.params.id,
             req.body,
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
         if (!updatedTask) {
             return res.status(404).json({ message: 'Task not found' });
@@ -62,7 +62,7 @@ const patchTask = async (req, res) => {
         const updatedTask = await TaskModel.findByIdAndUpdate(
             req.params.id,
             req.body,
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
 
         if (!updatedTask) return res.status(404).json({ message: 'Task not found' });

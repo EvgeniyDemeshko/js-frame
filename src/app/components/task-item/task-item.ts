@@ -2,8 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Task } from '../../core/models/task.model';
 import { TaskStatus } from '../../core/moc_data/status.enum';
-import { TaskStateService } from '../../share/state/task-state';
 import { MatSelectChange } from '@angular/material/select';
+import { AppState } from '../../app.state';
+import { Store } from '@ngrx/store';
+import * as TaskActions from '../../store/task/task.actions';
 
 @Component({
   selector: 'app-task-item',
@@ -13,18 +15,20 @@ import { MatSelectChange } from '@angular/material/select';
   providers: [DatePipe],
 })
 export class TaskItem {
-  @Input() task!: Task;
 
+  @Input() task!: Task;
   @Output() taskEdited: EventEmitter<Task> = new EventEmitter<Task>();
 
-  constructor(private taskStateService: TaskStateService) {}
+  constructor(private store: Store<AppState>) {}
 
   deleteTask(id: string): void {
-    this.taskStateService.deleteTask(id);
+    this.store.dispatch(TaskActions.deleteTask({ id }));
   }
 
   editTask(): void {
-    this.taskEdited.emit(this.task);
+    const id = this.task.id;
+    this.store.dispatch(TaskActions.selectTask({ id }));
+    this.taskEdited.emit();
   }
 
   getStatusClasses() {
@@ -37,7 +41,8 @@ export class TaskItem {
 
   updateStatus(event: MatSelectChange): void {
     const selectedValue = event.value;
-    this.taskStateService.patchTask(this.task.id, { status: selectedValue });
+    const id = this.task.id;
+    this.store.dispatch(TaskActions.patchTask({ id, changes: { status: selectedValue } }));
   }
 
   protected readonly TaskStatus = TaskStatus;

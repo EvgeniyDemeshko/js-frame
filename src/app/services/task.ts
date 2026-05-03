@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { Task } from '../core/models/task.model';
 import { AppConfig, CONFIG_TOKEN } from '../share/config/config';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { delay, map, Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { TaskApi } from '../core/models/task-api.model';
 import { TaskAdapter } from '../share/adapters/task.adapter';
 
@@ -22,7 +22,7 @@ export class TaskService {
     if (status) params = params.set('status', status);
 
     return this.http.get<TaskApi[]>(`${this.config.apiUrl}/v2/tasks`, { params }).pipe(
-      map((tasks: TaskApi[]) => tasks.map(task => TaskAdapter.fromAPI(task))), delay(5000)
+      map((tasks: TaskApi[]) => tasks.map(task => TaskAdapter.fromAPI(task)))
     );
   }
 

@@ -1,7 +1,7 @@
 <section class="task-list-container">
     <div class="task-header">
         <h2>Список завдань</h2>
-        <button mat-raised-button (click)="openDialog()">Додати завдання</button>
+        <button mat-raised-button (click)="openCreateDialog()">Додати завдання</button>
     </div>
 
     <mat-form-field>
@@ -27,7 +27,7 @@
             @for (task of data; track task.id; let index = $index) {
                 <app-task-item
                     [task]="task"
-                    (taskEdited)="editTask($event)">
+                    (taskEdited)="editTask(task)">
                 </app-task-item>
             } @empty {
                 <p>Завдання відсутні</p>

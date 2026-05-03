@@ -18,9 +18,9 @@
     <mat-form-field>
         <mat-label>Статус</mat-label>
         <mat-select (selectionChange)="updateStatus($event)">
+            <mat-option [value]="TaskStatus.DONE">Виконано</mat-option>
             <mat-option [value]="TaskStatus.TODO">До роботи</mat-option>
             <mat-option [value]="TaskStatus.IN_PROGRESS">У процесі</mat-option>
-            <mat-option [value]="TaskStatus.DONE">Виконано</mat-option>
         </mat-select>
     </mat-form-field>
 
